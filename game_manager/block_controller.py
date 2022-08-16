@@ -30,7 +30,7 @@ class Block_Controller(object):
 
         # print GameStatus
         print("=================================================>")
-        pprint.pprint(GameStatus, width = 61, compact = True)
+        #pprint.pprint(GameStatus, width = 61, compact = True)
 
         # current board info
         self.board_backboard = GameStatus["field_info"]["backboard"]
@@ -48,13 +48,28 @@ class Block_Controller(object):
         E0Shape_index = GameStatus["block_info"]["nextShapeList"]["element0"]["index"]
         E1Shape_index = GameStatus["block_info"]["nextShapeList"]["element1"]["index"]
         E2Shape_index = GameStatus["block_info"]["nextShapeList"]["element2"]["index"]
-        
+        E0Shape_Count = 0   # roop count
+        E1Shape_Count = 0   # roop count
+        E2Shape_Count = 0   # roop count
+
         # search best nextMove -->
         strategy = None
         LatestEvalValue = -100000
-        # search with element0 block Shape
+        # serch preparation
         if E0Shape_index == 1:
             E0ShapeDirectionRange = (0,)
+        else:
+            E0Shape_Count = len(E0ShapeDirectionRange)
+        if E1Shape_index == 1:
+            E1ShapeDirectionRange = (0,)
+        else:
+            E1Shape_Count = len(E1ShapeDirectionRange)
+        if E2Shape_index == 1:
+            E2ShapeDirectionRange = (0,)
+        else:
+            E2Shape_Count = len(E2ShapeDirectionRange)
+        
+        # search with element0 block Shape
         for direction0 in E0ShapeDirectionRange:
             # search with x range
             if E0Shape_index == 1:
@@ -68,8 +83,6 @@ class Block_Controller(object):
                 board0 = self.getBoard(self.board_backboard, E0Shape_class, direction0, x0)
 
                 # search with element1 block Shape
-                if E1Shape_index == 1:
-                    E1ShapeDirectionRange = (0,)
                 for direction1 in E1ShapeDirectionRange:
                     # search with x range
                     if E1Shape_index == 1:
@@ -82,37 +95,44 @@ class Block_Controller(object):
                         # get board data, as if dropdown block
                         board1 = self.getBoard(board0, E1Shape_class, direction1, x1)
 
-                        # search with element2 block Shape
-                        if E2Shape_index == 1:
-                            E2ShapeDirectionRange = (0,)
-                        for direction2 in E2ShapeDirectionRange:
-                            # search with x range
-                            if E2Shape_index == 1:
-                                x2Min = self.Isearch(board1)
-                                x2MinMax = (x2Min,)
-                            else:
-                                x2Min, x2Max = self.getSearchXRange(E2Shape_class, direction2)
-                                x2MinMax = range(x2Min, x2Max)
-                            for x2 in x2MinMax:
-                                # get board data, as if dropdown block
-                                board2 = self.getBoard(board1, E2Shape_class, direction2, x2)
+                        if (E0Shape_Count+E1Shape_Count+E2Shape_Count) > 8:
+                            #print(direction0,x0,direction1,x1)
+                            # evaluate board
+                            EvalValue = self.calcEvaluationValueSample(board1)
+                            # update best move
+                            if EvalValue > LatestEvalValue:
+                                strategy = (direction0, x0, 1, 1)
+                                LatestEvalValue = EvalValue
+                        else:
+                            # search with element2 block Shape
+                            for direction2 in E2ShapeDirectionRange:
+                                # search with x range
+                                if E2Shape_index == 1:
+                                    x2Min = self.Isearch(board1)
+                                    x2MinMax = (x2Min,)
+                                else:
+                                    x2Min, x2Max = self.getSearchXRange(E2Shape_class, direction2)
+                                    x2MinMax = range(x2Min, x2Max)
+                                for x2 in x2MinMax:
+                                    # get board data, as if dropdown block
+                                    board2 = self.getBoard(board1, E2Shape_class, direction2, x2)
 
-                                #print(direction0,x0,direction1,x1,direction2,x2)
-                                # evaluate board
-                                EvalValue = self.calcEvaluationValueSample(board2)
-                                # update best move
-                                if EvalValue > LatestEvalValue:
-                                    strategy = (direction0, x0, 1, 1)
-                                    LatestEvalValue = EvalValue
+                                    #print(direction0,x0,direction1,x1,direction2,x2)
+                                    # evaluate board
+                                    EvalValue = self.calcEvaluationValueSample(board2)
+                                    # update best move
+                                    if EvalValue > LatestEvalValue:
+                                        strategy = (direction0, x0, 1, 1)
+                                        LatestEvalValue = EvalValue
 
-        print(LatestEvalValue)
+        #print(LatestEvalValue)
+        #print(E0Shape_Count,E1Shape_Count,E2Shape_Count)
         print("===", datetime.now() - t1)
         nextMove["strategy"]["direction"] = strategy[0]
         nextMove["strategy"]["x"] = strategy[1]
         nextMove["strategy"]["y_operation"] = strategy[2]
         nextMove["strategy"]["y_moveblocknum"] = strategy[3]
-        print(nextMove)
-        print("###### SAMPLE CODE ######")
+        #print(nextMove)
         return nextMove
 
     def getSearchXRange(self, Shape_class, direction):
