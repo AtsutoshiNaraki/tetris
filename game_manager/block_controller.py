@@ -82,13 +82,28 @@ class Block_Controller(object):
                         # get board data, as if dropdown block
                         board1 = self.getBoard(board0, E1Shape_class, direction1, x1)
 
-                        #print(direction0,x0,direction1,x1)
-                        # evaluate board
-                        EvalValue = self.calcEvaluationValueSample(board1)
-                        # update best move
-                        if EvalValue > LatestEvalValue:
-                            strategy = (direction0, x0, 1, 1)
-                            LatestEvalValue = EvalValue
+                        # search with element2 block Shape
+                        if E2Shape_index == 1:
+                            E2ShapeDirectionRange = (0,)
+                        for direction2 in E2ShapeDirectionRange:
+                            # search with x range
+                            if E2Shape_index == 1:
+                                x2Min = self.Isearch(board1)
+                                x2MinMax = (x2Min,)
+                            else:
+                                x2Min, x2Max = self.getSearchXRange(E2Shape_class, direction2)
+                                x2MinMax = range(x2Min, x2Max)
+                            for x2 in x2MinMax:
+                                # get board data, as if dropdown block
+                                board2 = self.getBoard(board1, E2Shape_class, direction2, x2)
+
+                                #print(direction0,x0,direction1,x1,direction2,x2)
+                                # evaluate board
+                                EvalValue = self.calcEvaluationValueSample(board2)
+                                # update best move
+                                if EvalValue > LatestEvalValue:
+                                    strategy = (direction0, x0, 1, 1)
+                                    LatestEvalValue = EvalValue
 
         print(LatestEvalValue)
         print("===", datetime.now() - t1)
