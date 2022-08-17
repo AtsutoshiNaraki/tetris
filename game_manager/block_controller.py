@@ -205,6 +205,7 @@ class Block_Controller(object):
         nHoles, nIsolatedBlocks = 0, 0
         ## absolute differencial value of MaxY
         absDy = 0
+        diff4count = 0
         ## how blocks are accumlated
         BlockMaxY = [0] * width
         holeCandidates = [0] * width
@@ -253,6 +254,8 @@ class Block_Controller(object):
             BlockMaxDy += [val]
         for x in BlockMaxDy:
             absDy += abs(x)
+            if abs(x) >= 4:
+                diff4count += 1
 
         # standard deviation
         average = sum(BlockMaxY)/len(BlockMaxY)
@@ -269,11 +272,12 @@ class Block_Controller(object):
         # calc Evaluation Value
         score = 0
         #score = score + fullLines * 10.0           # try to delete line 
-        score = score - nHoles * 100.0               # try not to make hole
+        score = score - nHoles * 100.0              # try not to make hole
         #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
-        #score = score - absDy * 1.0                # try to put block smoothly
         score = score - standard_deviation * 1.0    # standard deviation
-
+        #score = score - absDy * 0.000000001        # try to put block smoothly
+        score = score - diff4count * 0.00001        # difference 4block count
+        
         #print(score, nHoles, standard_deviation)
         return score
 
