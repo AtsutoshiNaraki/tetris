@@ -54,6 +54,9 @@ class Block_Controller(object):
         E2Shape_Count = 0   # roop count
         random_seed = GameStatus["debug_info"]["random_seed"]
 
+        # print index & count
+        print("index&count",E0Shape_index, self.BlockCount)
+
         # search best nextMove -->
         strategy = None
         LatestEvalValue = -100000
@@ -126,19 +129,15 @@ class Block_Controller(object):
                                     if EvalValue > LatestEvalValue:
                                         strategy = (direction0, x0, 1, 1)
                                         LatestEvalValue = EvalValue
-        # Level1 Special Setting
-        if random_seed == 0:
-            if self.BlockCount == 163:
-                if E0Shape_index == 2:
-                    strategy = (0, 2, 1, 1)
 
-        #print(LatestEvalValue)
+        print(LatestEvalValue)
         #print(E0Shape_Count,E1Shape_Count,E2Shape_Count)
         print("===", datetime.now() - t1)
         nextMove["strategy"]["direction"] = strategy[0]
         nextMove["strategy"]["x"] = strategy[1]
         nextMove["strategy"]["y_operation"] = strategy[2]
         nextMove["strategy"]["y_moveblocknum"] = strategy[3]
+        print("nextMove",strategy[0],strategy[1])
         #print(nextMove)
         return nextMove
 
@@ -213,6 +212,8 @@ class Block_Controller(object):
         ## absolute differencial value of MaxY
         absDy = 0
         diff4count = 0
+        ##  block difference edges
+        DiffEdgeCount = 0
         ## how blocks are accumlated
         BlockMaxY = [0] * width
         holeCandidates = [0] * width
@@ -276,6 +277,12 @@ class Block_Controller(object):
         variance = zure_sum/len(BlockMaxY)
         standard_deviation = math.sqrt(variance)
 
+        # Check the difference edges
+        if (BlockMaxY[0] + 3) <= BlockMaxY[1]:
+            DiffEdgeCount = +(BlockMaxY[1]-BlockMaxY[0])/4
+        if (BlockMaxY[self.board_data_width-2] + 3) <= BlockMaxY[self.board_data_width-3]:
+            DiffEdgeCount = +(BlockMaxY[self.board_data_width-3] - BlockMaxY[self.board_data_width-2])/4
+
         # calc Evaluation Value
         score = 0
         #score = score + fullLines * 10.0           # try to delete line 
@@ -284,8 +291,11 @@ class Block_Controller(object):
         score = score - standard_deviation * 1.0    # standard deviation
         #score = score - absDy * 0.000000001        # try to put block smoothly
         score = score - diff4count * 0.00001        # difference 4block count
-        
-        #print(score, nHoles, standard_deviation)
+        if self.BlockCount < 160:
+            score = score - DiffEdgeCount * 0.0001
+        else:
+            score = score - DiffEdgeCount * 0.2
+        #print(score, nHoles, standard_deviation, DiffEdgeCount)
         return score
 
     def Isearch(self, board):
