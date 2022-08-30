@@ -130,14 +130,14 @@ class Block_Controller(object):
                                         strategy = (direction0, x0, 1, 1)
                                         LatestEvalValue = EvalValue
 
-        print(LatestEvalValue)
+        #print(LatestEvalValue)
         #print(E0Shape_Count,E1Shape_Count,E2Shape_Count)
         print("===", datetime.now() - t1)
         nextMove["strategy"]["direction"] = strategy[0]
         nextMove["strategy"]["x"] = strategy[1]
         nextMove["strategy"]["y_operation"] = strategy[2]
         nextMove["strategy"]["y_moveblocknum"] = strategy[3]
-        print("nextMove",strategy[0],strategy[1])
+        #print("nextMove",strategy[0],strategy[1])
         #print(nextMove)
         return nextMove
 
@@ -206,11 +206,12 @@ class Block_Controller(object):
 
         # evaluation paramters
         ## lines to be removed
-        fullLines = 0
+        #fullLines = 0
         ## number of holes or blocks in the line.
-        nHoles, nIsolatedBlocks = 0, 0
+        nHoles = 0
+        #nIsolatedBlocks = 0
         ## absolute differencial value of MaxY
-        absDy = 0
+        #absDy = 0
         diff4count = 0
         ##  block difference edges
         DiffEdgeCount = 0
@@ -238,18 +239,18 @@ class Block_Controller(object):
                     if holeCandidates[x] > 0:
                         holeConfirm[x] += holeCandidates[x]  # update number of holes in target column..
                         holeCandidates[x] = 0                # reset
-                    if holeConfirm[x] > 0:
-                        nIsolatedBlocks += 1                 # update number of isolated blocks
+                    #if holeConfirm[x] > 0:
+                    #    nIsolatedBlocks += 1                 # update number of isolated blocks
 
-            if hasBlock == True and hasHole == False:
+            #if hasBlock == True and hasHole == False:
                 # filled with block
-                fullLines += 1
-            elif hasBlock == True and hasHole == True:
+            #    fullLines += 1
+            #elif hasBlock == True and hasHole == True:
                 # do nothing
-                pass
-            elif hasBlock == False:
+            #    pass
+            #elif hasBlock == False:
                 # no block line (and ofcourse no hole)
-                pass
+            #    pass
 
         # nHoles
         for x in holeConfirm:
@@ -261,7 +262,7 @@ class Block_Controller(object):
             val = BlockMaxY[i] - BlockMaxY[i+1]
             BlockMaxDy += [val]
         for x in BlockMaxDy:
-            absDy += abs(x)
+            #absDy += abs(x)
             if abs(x) >= 4:
                 diff4count += 1
 
