@@ -17,6 +17,9 @@ class Block_Controller(object):
     CurrentShape_class = 0
     NextShape_class = 0
     BlockCount = 0
+    GameLevel = 0
+    BlockHigh = [0] * 10
+    BlockMax = 0
 
     # GetNextMove is main function.
     # input
@@ -56,7 +59,19 @@ class Block_Controller(object):
 
         # print index & count
         print("index&count",E0Shape_index, self.BlockCount)
-
+        # set BlockHigh
+        self.SetBlockHigh(self.board_backboard)
+        self.BlockMax = max(self.BlockHigh)
+        #print(self.BlockHigh)
+        # Check Game Level
+        if self.BlockCount == 1:
+            if random_seed == 0:
+                self.GameLevel = 1
+            elif self.BlockMax == 0:
+                self.GameLevel = 2
+            else:
+                self.GameLevel = 3
+            #print("GameLevel",self.GameLevel)
         # search best nextMove -->
         strategy = None
         LatestEvalValue = -100000
@@ -348,5 +363,26 @@ class Block_Controller(object):
 
         #print("I",MinMax4Count,MinX)
         return MinX
+
+    def SetBlockHigh(self, board):
+        #
+        # sample function of evaluate board.
+        #
+        width = self.board_data_width
+        height = self.board_data_height
+
+        ### check board
+        # each x line
+        for x in range(width):
+            # each y line
+            for y in range(height):
+                if board[y * self.board_data_width + x] == self.ShapeNone_index:
+                    # hole
+                    pass
+                else:
+                    # block
+                    self.BlockHigh[x] = height - y                # update blockHigh
+                    break
+        return
 
 BLOCK_CONTROLLER = Block_Controller()
