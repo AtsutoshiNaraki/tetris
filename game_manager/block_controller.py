@@ -62,7 +62,7 @@ class Block_Controller(object):
         # set BlockHigh
         self.SetBlockHigh(self.board_backboard)
         self.BlockMax = max(self.BlockHigh)
-        #print(self.BlockHigh)
+        print(self.BlockHigh)
         # Check Game Level
         if self.BlockCount == 1:
             if random_seed == 0:
@@ -89,61 +89,68 @@ class Block_Controller(object):
         else:
             E2Shape_Count = len(E2ShapeDirectionRange)
         
-        # search with element0 block Shape
-        for direction0 in E0ShapeDirectionRange:
-            # search with x range
-            if E0Shape_index == 1:
-                x0Min = self.Isearch(self.board_backboard)
-                x0MinMax = (x0Min,)
-            else:
-                x0Min, x0Max = self.getSearchXRange(E0Shape_class, direction0)
-                x0MinMax = range(x0Min, x0Max)
-            for x0 in x0MinMax:
-                # get board data, as if dropdown block
-                board0 = self.getBoard(self.board_backboard, E0Shape_class, direction0, x0)
+        # High Block Choice
+        BlockFix = (0,0,0)
+        if self.GameLevel != 1:
+            BlockFix = self.ChoiceHighBlock(E0Shape_index)
+        if BlockFix[0] == 1:
+            strategy = (BlockFix[1],BlockFix[2],1,1)
+        else:
+            # search with element0 block Shape
+            for direction0 in E0ShapeDirectionRange:
+                # search with x range
+                if E0Shape_index == 1:
+                    x0Min = self.Isearch(self.board_backboard)
+                    x0MinMax = (x0Min,)
+                else:
+                    x0Min, x0Max = self.getSearchXRange(E0Shape_class, direction0)
+                    x0MinMax = range(x0Min, x0Max)
+                for x0 in x0MinMax:
+                    # get board data, as if dropdown block
+                    board0 = self.getBoard(self.board_backboard, E0Shape_class, direction0, x0)
 
-                # search with element1 block Shape
-                for direction1 in E1ShapeDirectionRange:
-                    # search with x range
-                    if E1Shape_index == 1:
-                        x1Min = self.Isearch(board0)
-                        x1MinMax = (x1Min,)
-                    else:
-                        x1Min, x1Max = self.getSearchXRange(E1Shape_class, direction1)
-                        x1MinMax = range(x1Min, x1Max)
-                    for x1 in x1MinMax:
-                        # get board data, as if dropdown block
-                        board1 = self.getBoard(board0, E1Shape_class, direction1, x1)
-
-                        if (E0Shape_Count+E1Shape_Count+E2Shape_Count) > 8:
-                            #print(direction0,x0,direction1,x1)
-                            # evaluate board
-                            EvalValue = self.calcEvaluationValueSample(board1)
-                            # update best move
-                            if EvalValue > LatestEvalValue:
-                                strategy = (direction0, x0, 1, 1)
-                                LatestEvalValue = EvalValue
+                    # search with element1 block Shape
+                    for direction1 in E1ShapeDirectionRange:
+                        # search with x range
+                        if E1Shape_index == 1:
+                            x1Min = self.Isearch(board0)
+                            x1MinMax = (x1Min,)
                         else:
-                            # search with element2 block Shape
-                            for direction2 in E2ShapeDirectionRange:
-                                # search with x range
-                                if E2Shape_index == 1:
-                                    x2Min = self.Isearch(board1)
-                                    x2MinMax = (x2Min,)
-                                else:
-                                    x2Min, x2Max = self.getSearchXRange(E2Shape_class, direction2)
-                                    x2MinMax = range(x2Min, x2Max)
-                                for x2 in x2MinMax:
-                                    # get board data, as if dropdown block
-                                    board2 = self.getBoard(board1, E2Shape_class, direction2, x2)
+                            x1Min, x1Max = self.getSearchXRange(E1Shape_class, direction1)
+                            x1MinMax = range(x1Min, x1Max)
+                        for x1 in x1MinMax:
+                            # get board data, as if dropdown block
+                            board1 = self.getBoard(board0, E1Shape_class, direction1, x1)
 
-                                    #print(direction0,x0,direction1,x1,direction2,x2)
-                                    # evaluate board
-                                    EvalValue = self.calcEvaluationValueSample(board2)
-                                    # update best move
-                                    if EvalValue > LatestEvalValue:
-                                        strategy = (direction0, x0, 1, 1)
-                                        LatestEvalValue = EvalValue
+                            if (E0Shape_Count+E1Shape_Count+E2Shape_Count) > 8:
+                                #print(direction0,x0,direction1,x1)
+                                # evaluate board
+                                EvalValue = self.calcEvaluationValueSample(board1)
+                                # update best move
+                                if EvalValue > LatestEvalValue:
+                                    strategy = (direction0, x0, 1, 1)
+                                    LatestEvalValue = EvalValue
+                            else:
+                                # search with element2 block Shape
+                                for direction2 in E2ShapeDirectionRange:
+                                    # search with x range
+                                    if E2Shape_index == 1:
+                                        x2Min = self.Isearch(board1)
+                                        x2MinMax = (x2Min,)
+                                    else:
+                                        x2Min, x2Max = self.getSearchXRange(E2Shape_class, direction2)
+                                        x2MinMax = range(x2Min, x2Max)
+                                    for x2 in x2MinMax:
+                                        # get board data, as if dropdown block
+                                        board2 = self.getBoard(board1, E2Shape_class, direction2, x2)
+
+                                        #print(direction0,x0,direction1,x1,direction2,x2)
+                                        # evaluate board
+                                        EvalValue = self.calcEvaluationValueSample(board2)
+                                        # update best move
+                                        if EvalValue > LatestEvalValue:
+                                            strategy = (direction0, x0, 1, 1)
+                                            LatestEvalValue = EvalValue
 
         #print(LatestEvalValue)
         #print(E0Shape_Count,E1Shape_Count,E2Shape_Count)
@@ -366,10 +373,11 @@ class Block_Controller(object):
 
     def SetBlockHigh(self, board):
         #
-        # sample function of evaluate board.
+        # Stores the height of the Block in BlockHigh[].
         #
         width = self.board_data_width
         height = self.board_data_height
+        self.BlockHigh = [0] * width
 
         ### check board
         # each x line
@@ -384,5 +392,71 @@ class Block_Controller(object):
                     self.BlockHigh[x] = height - y                # update blockHigh
                     break
         return
+
+    def ChoiceHighBlock(self, index):
+        #
+        # Stores the height of the Block in BlockHigh[].
+        #
+        blockfix = (0,0,0)  # fix , direction , x
+        if self.GameLevel == 2:
+            HeightThreshold = 12
+        else:
+            HeightThreshold = 14
+        if self.BlockMax > HeightThreshold:
+            MinIndex = self.BlockHigh.index(min(self.BlockHigh))
+            if index == 1:                                          # I Block
+                if min(self.BlockHigh) == self.BlockHigh[9]:        # min high index = 9
+                    blockfix = (1,0,9)
+                else:
+                    blockfix = (1,0,MinIndex)
+            elif index == 2:                                        # L Block
+                if MinIndex == 9:
+                    if (self.BlockHigh[8] - self.BlockHigh[9]) >= 2:
+                        blockfix = (1,2,9)
+                elif MinIndex > 0:
+                    if (self.BlockHigh[MinIndex-1] - self.BlockHigh[MinIndex]) >= 2:
+                        if (self.BlockHigh[MinIndex+1] - self.BlockHigh[MinIndex]) >= 2:    # best 2 or 3
+                            if self.BlockHigh[MinIndex+1] >= self.BlockHigh[MinIndex-1]:
+                                blockfix = (1,2,MinIndex)
+                elif (self.BlockHigh[8] - self.BlockHigh[9]) >= 2:
+                    blockfix = (1,2,9)
+            elif index == 3:                                        # J Block
+                if MinIndex == 0:
+                    if (self.BlockHigh[1] - self.BlockHigh[0]) >= 2:
+                        blockfix = (1,2,0)
+                elif MinIndex < 9:
+                    if (self.BlockHigh[MinIndex+1] - self.BlockHigh[MinIndex]) >= 2:
+                        if (self.BlockHigh[MinIndex-1] - self.BlockHigh[MinIndex]) >= 2:    # best 2 or 3
+                            if self.BlockHigh[MinIndex-1] >= self.BlockHigh[MinIndex+1]:
+                                blockfix = (1,2,MinIndex)
+                elif (self.BlockHigh[1] - self.BlockHigh[0]) >= 2:
+                    blockfix = (1,2,0)
+            elif index == 4:                                        # T Block
+                if MinIndex == 8:
+                    if (self.BlockHigh[8]+1) == self.BlockHigh[9]:
+                        if (self.BlockHigh[7] - self.BlockHigh[8]) >= 2:
+                            blockfix = (1,0,8)
+                if MinIndex == 9:
+                    if (self.BlockHigh[9]+1) == self.BlockHigh[8]:
+                        if (self.BlockHigh[7] - self.BlockHigh[8]) >= 2:
+                            blockfix = (1,2,9)
+            elif index == 5:                                        # O Block
+                if MinIndex == 8:
+                    if self.BlockHigh[8] == self.BlockHigh[9]:
+                        if (self.BlockHigh[7] - self.BlockHigh[8]) >= 2:
+                            blockfix = (1,0,8)
+            elif index == 6:                                        # S Block
+                if MinIndex == 9:
+                    if (self.BlockHigh[9]+1) == self.BlockHigh[8]:
+                        if (self.BlockHigh[7] - self.BlockHigh[8]) >= 2:
+                            blockfix = (1,1,8)
+            elif index == 7:                                        # Z Block
+                if MinIndex == 8:
+                    if (self.BlockHigh[8]+1) == self.BlockHigh[9]:
+                        if (self.BlockHigh[7] - self.BlockHigh[8]) >= 2:
+                            blockfix = (1,1,8)
+            if blockfix[0] == 1:
+                print("BlockFix")
+        return blockfix
 
 BLOCK_CONTROLLER = Block_Controller()
