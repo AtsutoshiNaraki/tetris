@@ -21,6 +21,7 @@ class Block_Controller(object):
     BlockDiff = [0] * 9
     BlockMax = 0
     BlockMin = 0
+    BestIndex =  [[0 for i in range(10)] for j in range(3)]
 
     # GetNextMove is main function.
     # input
@@ -61,16 +62,44 @@ class Block_Controller(object):
         MaxIndex = self.BlockHigh.index(self.BlockMax)
 
         if E0Shape_index == 1:      # I
-            strategy = ( 0 , MinIndex , 1 , 1 )
+            high = 22
+            BestX = 10
+            for x in range(10):
+                if self.BestIndex[0][x] != 0:
+                    if self.BlockHigh[x] < high:
+                        BestX = x
+                        high = self.BlockHigh[x]
+            if BestX != 10:
+                strategy = ( 0 , BestX , 1 , 1 )
+            else:
+                strategy = ( 0 , MinIndex , 1 , 1 )
         elif  E0Shape_index == 2:   # L
-            if MinIndex == 0:
+            high = 22
+            BestX = 10
+            for x in range(10):
+                if self.BestIndex[1][x] != 0:
+                    if self.BlockHigh[x] < high:
+                        BestX = x
+                        high = self.BlockHigh[x]
+            if BestX != 10:
+                strategy = ( 2 , BestX , 1 , 1 )
+            elif MinIndex == 0:
                 if self.BlockHigh[0] == self.BlockHigh[1]:
                     if self.BlockHigh[0] == self.BlockHigh[2]:
                         strategy = ( 3 , MinIndex+1 , 1 , 1 )
                     else:
                         strategy = ( 0 , MinIndex , 1 , 1 )
                 else:
-                    strategy = ( 1 , MinIndex , 1 , 1 )
+                    high = 22
+                    BestX = 10
+                    for x in range(1,9):
+                        if self.BlockHigh[x] < high:
+                            BestX = x
+                            high = self.BlockHigh[x]
+                    if BestX != 10:
+                        strategy = ( 2 , BestX , 1 , 1 )
+                    else:
+                        strategy = ( 1 , 0 , 1 , 1 )                 # Hole
             elif MinIndex == 9:
                 strategy = ( 2 , MinIndex , 1 , 1 )
             elif MinIndex == 8:
@@ -87,7 +116,16 @@ class Block_Controller(object):
                 else:
                     strategy = ( 2 , MinIndex , 1 , 1 )
         elif  E0Shape_index == 3:   # J
-            if MinIndex == 0:
+            high = 22
+            BestX = 10
+            for x in range(10):
+                if self.BestIndex[2][x] != 0:
+                    if self.BlockHigh[x] < high:
+                        BestX = x
+                        high = self.BlockHigh[x]
+            if BestX != 10:
+                strategy = ( 2 , BestX , 1 , 1 )
+            elif MinIndex == 0:
                 if self.BlockHigh[0] == self.BlockHigh[1]:
                     if self.BlockHigh[0] == self.BlockHigh[2]:
                         strategy = ( 1 , MinIndex+1 , 1 , 1 )
@@ -96,7 +134,16 @@ class Block_Controller(object):
                 else:
                     strategy = ( 2 , MinIndex , 1 , 1 )
             elif MinIndex == 9:
-                strategy = ( 3 , MinIndex , 1 , 1 )
+                high = 22
+                BestX = 10
+                for x in range(9):
+                    if self.BlockHigh[x] < high:
+                        BestX = x
+                        high = self.BlockHigh[x]
+                if BestX != 10:
+                    strategy = ( 2 , BestX , 1 , 1 )
+                else:
+                    strategy = ( 3 , 9 , 1 , 1 )            # Hole
             elif MinIndex == 8:
                 if self.BlockHigh[8] == self.BlockHigh[9]:
                     strategy = ( 0 , MinIndex+1 , 1 , 1 )
@@ -145,11 +192,11 @@ class Block_Controller(object):
                 strategy = ( 0 , MinIndex , 1 , 1 )
             else:
                 BlockValue = []
-                for x0 in range(8):
+                for x0 in range(9):
                     if self.BlockHigh[x0] == self.BlockHigh[x0+1]:
                         BlockValue.append(self.BlockHigh[x0]+2)
                     else:
-                        BlockValue.append(self.BlockHigh[x0]+8)
+                        BlockValue.append(self.BlockHigh[x0]+12)
                 strategy = ( 0 , BlockValue.index(min(BlockValue)) , 1 , 1 )
         elif  E0Shape_index == 6:   # S
             if MinIndex == 0:
@@ -165,42 +212,42 @@ class Block_Controller(object):
                     strategy = ( 1 , 8 , 1 , 1 )
                 else:
                     BlockValue = []
-                    for x0 in range(8):
+                    for x0 in range(9):
                         if self.BlockDiff[x0] < 0:
                             BlockValue.append(self.BlockHigh[x0]+(self.BlockDiff[x0]*-1-1)*4)
                         else:
-                            BlockValue.append(self.BlockHigh[x0]+8)
+                            BlockValue.append(self.BlockHigh[x0]+12)
                     strategy = ( 1 , BlockValue.index(min(BlockValue)) , 1 , 1 )
             else:
                 if self.BlockDiff[MinIndex-1] == -1:
                     strategy = ( 1 , MinIndex-1 , 1 , 1 )
                 else:
                     BlockValue = []
-                    for x0 in range(8):
+                    for x0 in range(9):
                         if self.BlockDiff[x0] < 0:
                             BlockValue.append(self.BlockHigh[x0]+(self.BlockDiff[x0]*-1-1)*4)
                         else:
-                            BlockValue.append(self.BlockHigh[x0]+8)
+                            BlockValue.append(self.BlockHigh[x0]+12)
                     strategy = ( 1 , BlockValue.index(min(BlockValue)) , 1 , 1 )
         elif  E0Shape_index == 7:   # Z
             if MinIndex == 9:
                 BlockValue = []
-                for x0 in range(8):
+                for x0 in range(9):
                     if self.BlockDiff[x0] > 0:
                         BlockValue.append(self.BlockHigh[x0]+(self.BlockDiff[x0]-1)*4)
                     else:
-                        BlockValue.append(self.BlockHigh[x0]+8)
+                        BlockValue.append(self.BlockHigh[x0]+12)
                 strategy = ( 1 , BlockValue.index(min(BlockValue)) , 1 , 1 )
             else:
                 if self.BlockDiff[MinIndex] == 1:
                     strategy = ( 1 , MinIndex , 1 , 1 )
                 else:
                     BlockValue = []
-                    for x0 in range(8):
+                    for x0 in range(9):
                         if self.BlockDiff[x0] > 0:
                             BlockValue.append(self.BlockHigh[x0]+(self.BlockDiff[x0]-1)*4)
                         else:
-                            BlockValue.append(self.BlockHigh[x0]+8)
+                            BlockValue.append(self.BlockHigh[x0]+12)
                     strategy = ( 1 , BlockValue.index(min(BlockValue)) , 1 , 1 )
  
         print("Index=",E0Shape_index)
@@ -238,8 +285,31 @@ class Block_Controller(object):
                     # block
                     self.BlockHigh[x] = height - y                # update blockHigh
                     break
+        
+        # Diff check
         for x in range(width-1):
             self.BlockDiff[x] = self.BlockHigh[x+1] - self.BlockHigh[x]
+        #print("diff=",self.BlockDiff)
+
+        # Best Index check
+        self.BestIndex = [[0 for i in range(10)] for j in range(3)]
+        if self.BlockDiff[0] == 2:
+            self.BestIndex[1][0] = 3
+        elif self.BlockDiff[0] > 2:
+            self.BestIndex[0][0] = 1
+        for x in range(1,9):
+            if self.BlockDiff[x-1] == -2:
+                self.BestIndex[1][x] = 2
+            if self.BlockDiff[x] == 2:
+                self.BestIndex[2][x] = 3
+            if self.BlockDiff[x-1] < -2 and self.BlockDiff[x] > 2:
+                self.BestIndex[0][x] = 1
+        if self.BlockDiff[8] == -2:
+           self.BestIndex[1][9] = 2
+        elif self.BlockDiff[8] < -2:
+            self.BestIndex[0][9] = 1
+        #print(self.BestIndex)
+
         return
 
 BLOCK_CONTROLLER = Block_Controller()
