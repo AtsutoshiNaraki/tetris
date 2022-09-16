@@ -21,6 +21,7 @@ class Block_Controller(object):
     BlockHigh = [0] * 10
     BlockDiff = [0] * 9
     BlockMax = 0
+    DropMode = 10
 
     # GetNextMove is main function.
     # input
@@ -73,6 +74,31 @@ class Block_Controller(object):
             else:
                 self.GameLevel = 3
             #print("GameLevel",self.GameLevel)
+
+        # select Drop Mode
+        if self.GameLevel == 1:
+            if self.BlockCount > 160:
+                self.DropMode = 11
+        elif self.GameLevel == 2:
+            if self.BlockCount == 1:
+                self.DropMode = 20
+            elif self.DropMode == 20:
+                if self.BlockMax > 15:
+                    self.DropMode = 21
+            elif self.DropMode == 21:
+                if self.BlockMax < 12:
+                    self.DropMode = 20
+        elif self.GameLevel == 3:
+            if self.BlockCount == 1:
+                self.DropMode = 31
+            elif self.DropMode == 30:
+                if self.BlockMax > 15:
+                    self.DropMode = 31
+            elif self.DropMode == 31:
+                if self.BlockMax < 12:
+                    self.DropMode = 30
+        print("DropMode",self.DropMode)        
+
         # search best nextMove -->
         strategy = None
         LatestEvalValue = -100000
@@ -164,8 +190,10 @@ class Block_Controller(object):
         #
         minX, maxX, _, _ = Shape_class.getBoundingOffsets(direction) # get shape x offsets[minX,maxX] as relative value.
         xMin = -1 * minX
-        #xMax = self.board_data_width - maxX
-        xMax = self.board_data_width - maxX-1                           # right side 9Line
+        if self.DropMode == 21 or self.DropMode == 31:
+            xMax = self.board_data_width - maxX
+        else:
+            xMax = self.board_data_width - maxX-1                           # right side 9Line
         return xMin, xMax
 
     def getShapeCoordArray(self, Shape_class, direction, x, y):
@@ -223,7 +251,7 @@ class Block_Controller(object):
 
         # evaluation paramters
         ## lines to be removed
-        #fullLines = 0
+        fullLines = 0
         ## number of holes or blocks in the line.
         nHoles = 0
         #nIsolatedBlocks = 0
@@ -259,15 +287,15 @@ class Block_Controller(object):
                     #if holeConfirm[x] > 0:
                     #    nIsolatedBlocks += 1                 # update number of isolated blocks
 
-            #if hasBlock == True and hasHole == False:
+            if hasBlock == True and hasHole == False:
                 # filled with block
-            #    fullLines += 1
-            #elif hasBlock == True and hasHole == True:
+                fullLines += 1
+            elif hasBlock == True and hasHole == True:
                 # do nothing
-            #    pass
-            #elif hasBlock == False:
+                pass
+            elif hasBlock == False:
                 # no block line (and ofcourse no hole)
-            #    pass
+                pass
 
         # nHoles
         for x in holeConfirm:
@@ -303,16 +331,55 @@ class Block_Controller(object):
 
         # calc Evaluation Value
         score = 0
-        #score = score + fullLines * 10.0           # try to delete line 
-        score = score - nHoles * 100.0              # try not to make hole
-        #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
-        score = score - standard_deviation * 1.0    # standard deviation
-        #score = score - absDy * 0.000000001        # try to put block smoothly
-        score = score - diff4count * 0.00001        # difference 4block count
-        if self.BlockCount < 160:
+        if self.DropMode == 10:
+            #score = score + fullLines * 10.0           # try to delete line 
+            score = score - nHoles * 100.0              # try not to make hole
+            #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
+            score = score - standard_deviation * 1.0    # standard deviation
+            #score = score - absDy * 0.000000001        # try to put block smoothly
+            score = score - diff4count * 0.00001        # difference 4block count
             score = score - DiffEdgeCount * 0.0001
-        else:
+        elif self.DropMode == 11:
+            #score = score + fullLines * 10.0           # try to delete line 
+            score = score - nHoles * 100.0              # try not to make hole
+            #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
+            score = score - standard_deviation * 1.0    # standard deviation
+            #score = score - absDy * 0.000000001        # try to put block smoothly
+            score = score - diff4count * 0.00001        # difference 4block count
             score = score - DiffEdgeCount * 0.2
+        elif self.DropMode == 20:
+            #score = score + fullLines * 10.0           # try to delete line 
+            score = score - nHoles * 100.0              # try not to make hole
+            #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
+            score = score - standard_deviation * 1.0    # standard deviation
+            #score = score - absDy * 0.000000001        # try to put block smoothly
+            score = score - diff4count * 0.00001        # difference 4block count
+            score = score - DiffEdgeCount * 0.01
+        elif self.DropMode == 21:
+            score = score + fullLines * 10.0           # try to delete line 
+            score = score - nHoles * 0.5              # try not to make hole
+            #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
+            score = score - standard_deviation * 1.0    # standard deviation
+            #score = score - absDy * 0.000000001        # try to put block smoothly
+            score = score - diff4count * 1.0        # difference 4block count
+            score = score - DiffEdgeCount * 1.0
+        elif self.DropMode == 30:
+            #score = score + fullLines * 10.0           # try to delete line 
+            score = score - nHoles * 100.0              # try not to make hole
+            #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
+            score = score - standard_deviation * 1.0    # standard deviation
+            #score = score - absDy * 0.000000001        # try to put block smoothly
+            score = score - diff4count * 0.00001        # difference 4block count
+            score = score - DiffEdgeCount * 0.2
+        else:                                           #         self.DropMode == 31:
+            score = score + fullLines * 10.0           # try to delete line 
+            score = score - nHoles * 0.5              # try not to make hole
+            #score = score - nIsolatedBlocks * 5.0      # try not to make isolated block
+            score = score - standard_deviation * 1.0    # standard deviation
+            #score = score - absDy * 0.000000001        # try to put block smoothly
+            score = score - diff4count * 1.0        # difference 4block count
+            score = score - DiffEdgeCount * 1.0
+
         #print(score, nHoles, standard_deviation, DiffEdgeCount)
         return score
 
@@ -346,8 +413,12 @@ class Block_Controller(object):
         # MinMaxCheck
         for x in range(width):
             sub = BlockMaxY[x] - min(BlockMaxY)
-            if sub >= 4:
-                MinMax4Count +=1
+            if self.DropMode == 21 or self.DropMode == 31:
+                if sub >= 2:
+                    MinMax4Count +=1
+            else:
+                if sub >= 4:
+                    MinMax4Count +=1
             # Last X
             if x == width-1:
                 if MinMax4Count >= width-1:                     # 4line 
