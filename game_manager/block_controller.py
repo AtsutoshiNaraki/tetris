@@ -21,7 +21,7 @@ class Block_Controller(object):
     BlockDiff = [0] * 9
     BlockMax = 0
     BlockMin = 0
-    BestIndex =  [[0 for i in range(10)] for j in range(7)]
+    BestIndex =  [[0 for i in range(10)] for j in range(13)]
 
     # GetNextMove is main function.
     # input
@@ -35,7 +35,7 @@ class Block_Controller(object):
         t1 = datetime.now()
 
         # print GameStatus
-        print("=================================================>")
+        #print("=================================================>")
         #pprint.pprint(GameStatus, width = 61, compact = True)
 
         # current board info
@@ -53,7 +53,7 @@ class Block_Controller(object):
 
         # set BlockHigh
         self.SetBlockHigh(self.board_backboard)
-        print(self.BlockHigh)
+        #print(self.BlockHigh)
         self.BlockMax = max(self.BlockHigh)
         self.BlockMin = min(self.BlockHigh)
 
@@ -83,38 +83,47 @@ class Block_Controller(object):
                         high = self.BlockHigh[x]
             if BestX != 10:
                 strategy = ( 2 , BestX , 1 , 1 )
-            elif MinIndex == 0:
-                if self.BlockHigh[0] == self.BlockHigh[1]:
-                    if self.BlockHigh[0] == self.BlockHigh[2]:
-                        strategy = ( 3 , MinIndex+1 , 1 , 1 )
-                    else:
-                        strategy = ( 0 , MinIndex , 1 , 1 )
-                else:
-                    high = 22
-                    BestX = 10
-                    for x in range(1,9):
+            else:
+                high = 22
+                BestX = 10
+                for x in range(10):
+                    if self.BestIndex[7][x] != 0:
                         if self.BlockHigh[x] < high:
                             BestX = x
                             high = self.BlockHigh[x]
+                if BestX != 10:
+                    strategy = ( 1 , BestX , 1 , 1 )
+                else:
+                    high = 22
+                    BestX = 10
+                    for x in range(10):
+                        if self.BestIndex[8][x] != 0:
+                            if self.BlockHigh[x] < high:
+                                BestX = x
+                                high = self.BlockHigh[x]
                     if BestX != 10:
-                        strategy = ( 2 , BestX , 1 , 1 )
+                        strategy = ( 3 , BestX , 1 , 1 )
                     else:
-                        strategy = ( 1 , 0 , 1 , 1 )                 # Hole
-            elif MinIndex == 9:
-                strategy = ( 2 , MinIndex , 1 , 1 )
-            elif MinIndex == 8:
-                if self.BlockHigh[8] == self.BlockHigh[9]:
-                    strategy = ( 0 , MinIndex , 1 , 1 )
-                else:
-                    strategy = ( 2 , MinIndex , 1 , 1 )
-            else:
-                if self.BlockHigh[MinIndex] == self.BlockHigh[MinIndex+1]:
-                    if self.BlockHigh[MinIndex] == self.BlockHigh[MinIndex+2]:
-                        strategy = ( 3 , MinIndex+1 , 1 , 1 )
-                    else:
-                        strategy = ( 0 , MinIndex , 1 , 1 )
-                else:
-                    strategy = ( 2 , MinIndex , 1 , 1 )
+                        high = 22
+                        BestX = 10
+                        for x in range(10):
+                            if self.BestIndex[9][x] != 0:
+                                if self.BlockHigh[x] < high:
+                                    BestX = x
+                                    high = self.BlockHigh[x]
+                        if BestX != 10:
+                            strategy = ( 0 , BestX , 1 , 1 )
+                        else:
+                            if self.BlockHigh[0] > self.BlockHigh[9]:
+                                if self.BlockHigh[0] < 18:
+                                    strategy = ( 1 , 0 , 1 , 1 )
+                                else:
+                                    strategy = ( 2 , 9 , 1 , 1 )
+                            else:
+                                if self.BlockHigh[9] < 18:
+                                    strategy = ( 2 , 9 , 1 , 1 )
+                                else:
+                                    strategy = ( 1 , 0 , 1 , 1 )
         elif  E0Shape_index == 3:   # J
             high = 22
             BestX = 10
@@ -125,38 +134,47 @@ class Block_Controller(object):
                         high = self.BlockHigh[x]
             if BestX != 10:
                 strategy = ( 2 , BestX , 1 , 1 )
-            elif MinIndex == 0:
-                if self.BlockHigh[0] == self.BlockHigh[1]:
-                    if self.BlockHigh[0] == self.BlockHigh[2]:
-                        strategy = ( 1 , MinIndex+1 , 1 , 1 )
-                    else:
-                        strategy = ( 0 , MinIndex+1 , 1 , 1 )
-                else:
-                    strategy = ( 2 , MinIndex , 1 , 1 )
-            elif MinIndex == 9:
+            else:
                 high = 22
                 BestX = 10
-                for x in range(9):
-                    if self.BlockHigh[x] < high:
-                        BestX = x
-                        high = self.BlockHigh[x]
+                for x in range(10):
+                    if self.BestIndex[10][x] != 0:
+                        if self.BlockHigh[x] < high:
+                            BestX = x
+                            high = self.BlockHigh[x]
                 if BestX != 10:
-                    strategy = ( 2 , BestX , 1 , 1 )
+                    strategy = ( 3 , BestX , 1 , 1 )
                 else:
-                    strategy = ( 3 , 9 , 1 , 1 )            # Hole
-            elif MinIndex == 8:
-                if self.BlockHigh[8] == self.BlockHigh[9]:
-                    strategy = ( 0 , MinIndex+1 , 1 , 1 )
-                else:
-                    strategy = ( 2 , MinIndex , 1 , 1 )
-            else:
-                if self.BlockHigh[MinIndex] == self.BlockHigh[MinIndex+1]:
-                    if self.BlockHigh[MinIndex] == self.BlockHigh[MinIndex+2]:
-                        strategy = ( 1 , MinIndex+1 , 1 , 1 )
+                    high = 22
+                    BestX = 10
+                    for x in range(10):
+                        if self.BestIndex[11][x] != 0:
+                            if self.BlockHigh[x] < high:
+                                BestX = x
+                                high = self.BlockHigh[x]
+                    if BestX != 10:
+                        strategy = ( 1 , BestX , 1 , 1 )
                     else:
-                        strategy = ( 0 , MinIndex+1 , 1 , 1 )
-                else:
-                    strategy = ( 2 , MinIndex , 1 , 1 )
+                        high = 22
+                        BestX = 10
+                        for x in range(10):
+                            if self.BestIndex[12][x] != 0:
+                                if self.BlockHigh[x] < high:
+                                    BestX = x
+                                    high = self.BlockHigh[x]
+                        if BestX != 10:
+                            strategy = ( 0 , BestX , 1 , 1 )
+                        else:
+                            if self.BlockHigh[0] > self.BlockHigh[9]:
+                                if self.BlockHigh[0] < 18:
+                                    strategy = ( 2 , 0 , 1 , 1 )
+                                else:
+                                    strategy = ( 3 , 9 , 1 , 1 )
+                            else:
+                                if self.BlockHigh[9] < 18:
+                                    strategy = ( 3 , 9 , 1 , 1 )
+                                else:
+                                    strategy = ( 2 , 0 , 1 , 1 )
         elif  E0Shape_index == 4:   # T
             if MinIndex == 0:
                 if self.BlockHigh[0] == self.BlockHigh[1]:
@@ -271,8 +289,8 @@ class Block_Controller(object):
                             else:
                                 strategy = ( 1 , 0 , 1 , 1 )
  
-        print("Index=",E0Shape_index)
-        print("d/x=",strategy[0],strategy[1])
+        #print("Index=",E0Shape_index)
+        #print("d/x=",strategy[0],strategy[1])
         self.BlockCount += 1
 
         nextMove["strategy"]["direction"] = strategy[0]
@@ -282,7 +300,7 @@ class Block_Controller(object):
         # search best nextMove <--
 
         # return nextMove
-        print("===", datetime.now() - t1)
+        #print("===", datetime.now() - t1)
         #print(nextMove)
         return nextMove
 
@@ -313,11 +331,20 @@ class Block_Controller(object):
         #print("diff=",self.BlockDiff)
 
         # Best Index check
-        self.BestIndex = [[0 for i in range(10)] for j in range(7)]
+        self.BestIndex = [[0 for i in range(10)] for j in range(13)]
         if self.BlockDiff[0] == 2:
             self.BestIndex[1][0] = 3
         elif self.BlockDiff[0] > 2:
             self.BestIndex[0][0] = 1
+        elif self.BlockDiff[0] == -1:
+            self.BestIndex[4][0] = 1
+        elif self.BlockDiff[0] == 1:
+            self.BestIndex[6][0] = 1
+        elif self.BlockDiff[0] == 0:
+            self.BestIndex[9][0] = 2
+            self.BestIndex[12][1] = 3
+
+
         for x in range(1,9):
             if self.BlockDiff[x-1] == -2:
                 self.BestIndex[1][x] = 2
@@ -325,24 +352,29 @@ class Block_Controller(object):
                 self.BestIndex[2][x] = 3
             if self.BlockDiff[x-1] < -2 and self.BlockDiff[x] > 2:
                 self.BestIndex[0][x] = 1
-        if self.BlockDiff[8] == -2:
-           self.BestIndex[1][9] = 2
-        elif self.BlockDiff[8] < -2:
-            self.BestIndex[0][9] = 1
-        # check Block s z
-        if self.BlockDiff[0] == -1:
-            self.BestIndex[4][0] = 1
-        elif self.BlockDiff[0] == 1:
-            self.BestIndex[6][0] = 1
-        for x in range(1,9):
             if self.BlockDiff[x-1] == 0 and self.BlockDiff[x] == 1:
                 self.BestIndex[3][x] = 1
             if self.BlockDiff[x-1] == -1 and self.BlockDiff[x] == 0:
                 self.BestIndex[5][x] = 1
             if self.BlockDiff[x] == -1:
                 self.BestIndex[4][x] = 1
-            elif self.BlockDiff[x] == 1:
+            if self.BlockDiff[x] == 1:
                 self.BestIndex[6][x] = 1
+            if self.BlockDiff[x-1] == 1 and self.BlockDiff[x] == 0:
+                self.BestIndex[7][x] = 2
+            if self.BlockDiff[x-1] == 0 and self.BlockDiff[x] == 0:
+                self.BestIndex[8][x] = 2
+                self.BestIndex[11][x] = 3
+            if self.BlockDiff[x] == 0:
+                self.BestIndex[9][x] = 2
+                self.BestIndex[12][x+1] = 3
+            if self.BlockDiff[x-1] == 0 and self.BlockDiff[x] == -1:
+                self.BestIndex[10][x] = 3   
+ 
+        if self.BlockDiff[8] == -2:
+           self.BestIndex[1][9] = 2
+        elif self.BlockDiff[8] < -2:
+            self.BestIndex[0][9] = 1
             
         #print(self.BestIndex)
 
